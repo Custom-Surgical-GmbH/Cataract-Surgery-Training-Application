@@ -4,25 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".LimbusDetectionActivity">
 
     <Button
-        android:id="@+id/limbusDetectionBtn"
+        android:id="@+id/process"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="startLimbusDetection"
-        android:text="limbus detection"
+        android:onClick="displayLimbusDetectionResult"
+        android:text="process"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="128dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/videoProcessingBtn"
+    <ImageView
+        android:id="@+id/resultImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="startVideoProcessing"
-        android:text="video processing"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/limbusDetectionBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/process"
+        app:srcCompat="@drawable/base1" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
