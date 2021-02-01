@@ -8,14 +8,12 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-
-import androidx.appcompat.app.AppCompatActivity;
+import android.widget.EditText;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -24,11 +22,8 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-public class VideoProcessingActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
-    private static final String TAG = "VideoProcessingActivity";
+public class IncisionsStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
+    private static final String TAG = "VideoProcessingDemo";
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private Mat mGray;
@@ -40,6 +35,11 @@ public class VideoProcessingActivity extends Activity implements CameraBridgeVie
     private Mat mGrayScaled;
     private Mat mWhiteScaled;
 
+    private double firstIncisionLength;
+    private double firstIncisionAngle;
+    private double secondIncisionLength;
+    private double secondIncisionAngle;
+
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -48,7 +48,7 @@ public class VideoProcessingActivity extends Activity implements CameraBridgeVie
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCvCameraView.enableView();
-                    mOpenCvCameraView.setOnTouchListener(VideoProcessingActivity.this);
+                    mOpenCvCameraView.setOnTouchListener(IncisionsStageActivity.this);
                 } break;
                 default:
                 {
@@ -65,7 +65,13 @@ public class VideoProcessingActivity extends Activity implements CameraBridgeVie
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_video_processing);
+        setContentView(R.layout.activity_video_processing_demo);
+
+        firstIncisionLength = getIntent().getDoubleExtra("firstIncisionLength", 5);
+        firstIncisionAngle = getIntent().getDoubleExtra("firstIncisionAngle", 0);
+        secondIncisionLength = getIntent().getDoubleExtra("secondIncisionLength", 10);
+        secondIncisionAngle = getIntent().getDoubleExtra("secondIncisionAngle", 90);
+
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.OpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
@@ -159,6 +165,11 @@ public class VideoProcessingActivity extends Activity implements CameraBridgeVie
 
             break;
         }
+
+        Imgproc.putText(mRgba, Double.toString(firstIncisionLength), new Point(100, 100), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
+        Imgproc.putText(mRgba, Double.toString(firstIncisionAngle), new Point(100, 150), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
+        Imgproc.putText(mRgba, Double.toString(secondIncisionLength), new Point(100, 200), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
+        Imgproc.putText(mRgba, Double.toString(secondIncisionAngle), new Point(100, 250), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
 
         return mRgba;
     }

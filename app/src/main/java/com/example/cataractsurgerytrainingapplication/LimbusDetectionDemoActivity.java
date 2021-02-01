@@ -18,12 +18,12 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
 
-public class LimbusDetectionActivity extends AppCompatActivity {
+public class LimbusDetectionDemoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_limbus_detection);
+        setContentView(R.layout.activity_limbus_detection_demo);
 
         OpenCVLoader.initDebug();
     }

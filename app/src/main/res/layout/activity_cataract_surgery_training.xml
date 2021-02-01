@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".CataractSurgeryTrainingActivity">
 
     <Button
-        android:id="@+id/limbusDetectionDemoBtn"
+        android:id="@+id/incisionsMenuBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -15,16 +15,14 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
-        android:clickable="true"
-        android:onClick="startLimbusDetectionDemo"
-        android:text="limbus detection demo"
-        android:visibility="visible"
+        android:onClick="startIncisionsMenu"
+        android:text="incisions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/videoProcessingDemoBtn"
+        android:id="@+id/capsulotomyMenuBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -32,14 +30,13 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
-        android:onClick="startVideoProcessingDemo"
-        android:text="video processing demo"
+        android:text="capsulotomy"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/limbusDetectionDemoBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/incisionsMenuBtn" />
 
     <Button
-        android:id="@+id/cataractSurgeryTrainingBtn"
+        android:id="@+id/emulsificationMenuBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -47,10 +44,23 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
-        android:onClick="startCataractSurgeryTrainingActivity"
-        android:text="cataract surgery training"
+        android:text="emulsification"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/videoProcessingDemoBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/capsulotomyMenuBtn" />
+
+    <Button
+        android:id="@+id/toricIOLPositioningMenuBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:text="toric iol positioning"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/emulsificationMenuBtn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
