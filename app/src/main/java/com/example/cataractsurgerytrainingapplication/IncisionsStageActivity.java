@@ -1,6 +1,11 @@
 package com.example.cataractsurgerytrainingapplication;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -10,10 +15,13 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -23,17 +31,18 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class IncisionsStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
-    private static final String TAG = "VideoProcessingDemo";
+    private static final String TAG = "IncisionsStage";
+    public static final double FIRST_INCISION_LENGTH_DEFAULT = 5.0;
+    public static final double FIRST_INCISION_ANGLE_DEFAULT = 90.0;
+    public static final double SECOND_INCISION_LENGTH_DEFAULT = 3.0;
+    public static final double SECOND_INCISION_ANGLE_DEFAULT = 180.0;
 
     private CameraBridgeViewBase mOpenCvCameraView;
-    private Mat mGray;
+    private LimbusDetectionHough limbusDetectionHough;
+    private BionikoDetectionCorrelation bionikoDetectionCorrelation;
     private Mat mRgba;
-    private Mat mCircles;
-    private double mScale;
-    private int mScaledHeight;
-    private int mScaledWidth;
-    private Mat mGrayScaled;
-    private Mat mWhiteScaled;
+    private Mat mGray;
+    private Mat mTest;
 
     private double firstIncisionLength;
     private double firstIncisionAngle;
@@ -65,13 +74,16 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_video_processing_demo);
+        setContentView(R.layout.activity_incisions_stage);
 
-        firstIncisionLength = getIntent().getDoubleExtra("firstIncisionLength", 5);
-        firstIncisionAngle = getIntent().getDoubleExtra("firstIncisionAngle", 0);
-        secondIncisionLength = getIntent().getDoubleExtra("secondIncisionLength", 10);
-        secondIncisionAngle = getIntent().getDoubleExtra("secondIncisionAngle", 90);
-
+        firstIncisionLength = getIntent().getDoubleExtra("firstIncisionLength",
+                FIRST_INCISION_LENGTH_DEFAULT);
+        firstIncisionAngle = getIntent().getDoubleExtra("firstIncisionAngle",
+                FIRST_INCISION_ANGLE_DEFAULT);
+        secondIncisionLength = getIntent().getDoubleExtra("secondIncisionLength",
+                SECOND_INCISION_LENGTH_DEFAULT);
+        secondIncisionAngle = getIntent().getDoubleExtra("secondIncisionAngle",
+                SECOND_INCISION_ANGLE_DEFAULT);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.OpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
@@ -110,25 +122,20 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
     @Override
     public void onCameraViewStarted(int width, int height) {
         Log.i(TAG, Integer.toString(width) + "x" + Integer.toString(height));
+//        Log.i(TAG, "Scaled height/width: " + mScaledHeight + "/" + mScaledWidth);
+
+        limbusDetectionHough = new LimbusDetectionHough(width, height);
+        bionikoDetectionCorrelation = new BionikoDetectionCorrelation(this, width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
-        mCircles = new Mat();
-
-        mScale = 640.0 / (double) Math.max(width, height);
-        mScaledHeight = (int) Math.round(height * mScale);
-        mScaledWidth = (int) Math.round(width * mScale);
-        Log.i(TAG, "Scaled height/width: " + mScaledHeight + "/" + mScaledWidth);
-        mGrayScaled = new Mat(mScaledHeight, mScaledWidth, CvType.CV_8UC1);
-        mWhiteScaled = new Mat(mScaledHeight, mScaledWidth, CvType.CV_8UC1, new Scalar(255));
+        mTest = new Mat();
     }
 
     @Override
     public void onCameraViewStopped() {
         mRgba.release();
         mGray.release();
-        mCircles.release();
-        mGrayScaled.release();
-        mWhiteScaled.release();
+        mTest.release();
     }
 
     @Override
@@ -141,35 +148,44 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
 
-        // copied over from LimbusDetectionActivity
-        Imgproc.resize(mGray, mGrayScaled, new Size(mScaledWidth, mScaledHeight));
-        Core.subtract(mWhiteScaled, mGrayScaled, mGrayScaled);
-        Imgproc.GaussianBlur(mGrayScaled, mGrayScaled, new Size(0,0), 2);
-//        Imgproc.HoughCircles(imgHough, circles, Imgproc.HOUGH_GRADIENT,
-//                1.0, 10.0, 120.0, 40.0,
-//                imgHough.rows() / 10, imgHough.rows() / 2);
-        Imgproc.HoughCircles(mGrayScaled, mCircles, Imgproc.HOUGH_GRADIENT,
-                1.0, 10.0, 120.0, 40.0);
+        double[] limbusCircle = limbusDetectionHough.process(mGray);
+        if (limbusCircle != null) {
+            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, limbusCircle, mTest);
 
-        // drawing markers on the final image
-//        Log.i(TAG, "circles detected:" + mCircles.cols());
-        for (int x = 0; x < mCircles.cols(); x++) {
-            double[] c = mCircles.get(0, x);
+            Overlays.drawCircle(mRgba, limbusCircle, new Scalar(0,255,0,255));
+            Overlays.drawAxis(mRgba, new Point(limbusCircle[0], limbusCircle[1]), bionikoAngle,
+                    limbusCircle[2]*2, new Scalar(0,255,0,255));
 
-            Point center = new Point(Math.round(c[0] / mScale), Math.round(c[1] / mScale));
-            // circle center
-            Imgproc.circle(mRgba, center, 1, new Scalar(0,255,0,255), 3, 8, 0 );
-            // circle outline
-            int radius = (int) Math.round(c[2] / mScale);
-            Imgproc.circle(mRgba, center, radius, new Scalar(0,255,0,255), 3, 8, 0 );
-
-            break;
+            // TODO: debug; remove
+//            Imgproc.resize(mTest, mTest, new Size());
         }
 
-        Imgproc.putText(mRgba, Double.toString(firstIncisionLength), new Point(100, 100), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
-        Imgproc.putText(mRgba, Double.toString(firstIncisionAngle), new Point(100, 150), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
-        Imgproc.putText(mRgba, Double.toString(secondIncisionLength), new Point(100, 200), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
-        Imgproc.putText(mRgba, Double.toString(secondIncisionAngle), new Point(100, 250), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
+//        Imgproc.putText(mRgba, Double.toString(firstIncisionLength), new Point(100, 100), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
+//        Imgproc.putText(mRgba, Double.toString(firstIncisionAngle), new Point(100, 150), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
+//        Imgproc.putText(mRgba, Double.toString(secondIncisionLength), new Point(100, 200), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
+//        Imgproc.putText(mRgba, Double.toString(secondIncisionAngle), new Point(100, 250), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
+
+//        Bitmap b = Bitmap.createBitmap(500, 100, Bitmap.Config.ARGB_8888);
+//        b.eraseColor(Color.WHITE);
+//        Canvas c = new Canvas(b);
+//        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+//        p.setColor(Color.BLACK);
+//        p.setTextSize((float) (100*1.35));
+//        p.setTypeface(ResourcesCompat.getFont(this, R.font.century_gothic_bold));
+//        p.setTextAlign(Paint.Align.LEFT);
+//        Rect bounds = new Rect();
+//        String text = "BIONIKO";
+//        p.getTextBounds(text,0, text.length(), bounds);
+////        Log.i(TAG, bounds.toString());
+//        Log.i(TAG, String.valueOf(bounds.width()) + "x" + String.valueOf(bounds.height()));
+//        c.drawText(text, 0, 100, p);
+//
+//        Mat m = new Mat();
+//        Utils.bitmapToMat(b, m);
+//
+//        m.copyTo(mRgba.rowRange(0, m.rows()).colRange(0, m.cols()));
+
+
 
         return mRgba;
     }
