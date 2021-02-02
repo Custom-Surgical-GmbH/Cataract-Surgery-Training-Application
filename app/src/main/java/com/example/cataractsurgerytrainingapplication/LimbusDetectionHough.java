@@ -11,7 +11,6 @@ import org.opencv.imgproc.Imgproc;
 
 public class LimbusDetectionHough {
     private Mat gray;
-//    private Mat rgba;
     private Mat circles;
     private final double scale;
     private final int scaledHeight;
@@ -21,10 +20,8 @@ public class LimbusDetectionHough {
 
 
     public LimbusDetectionHough(int width, int height) {
-//        rgba = new Mat(height, width, CvType.CV_8UC4);
         gray = new Mat(height, width, CvType.CV_8UC1);
         circles = new Mat();
-
 
         scale = 640.0 / (double) Math.max(width, height);
         scaledHeight = (int) Math.round(height * scale);
@@ -45,6 +42,7 @@ public class LimbusDetectionHough {
             return null;
         }
 
+        // TODO: add validation; don't pick the first circle naively
         double[] bestCircle = circles.get(0, 0);
         for (int i = 0; i < 3; i++) {
             bestCircle[i] = bestCircle[i] / scale;

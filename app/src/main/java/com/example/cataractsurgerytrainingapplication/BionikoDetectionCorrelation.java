@@ -36,6 +36,7 @@ public class BionikoDetectionCorrelation {
     private Mat grayPolar;
     private Bitmap bionikoBm;
     Rect bionikoBounds;
+    MinMaxLocResult minMaxLocResult;
     private Mat bionikoRgba;
     private Mat bionikoGray;
     private Mat ccoeffNormed;
@@ -53,7 +54,9 @@ public class BionikoDetectionCorrelation {
         bionikoPaint.setTypeface(ResourcesCompat.getFont(context, R.font.century_gothic_bold));
     }
 
-    public double process(Mat newGray, double[] limbusCircle, Mat v) {
+    // TODO: do multiple matchings to also check for blind angles (move polar coordinates by 180)
+    //  and visibility in various color spaces
+    public double process(Mat newGray, double[] limbusCircle) {
         this.limbusCircle = limbusCircle;
         gray = newGray;
         Imgproc.warpPolar(gray, grayPolar, new Size(0,0),
@@ -63,28 +66,27 @@ public class BionikoDetectionCorrelation {
         Imgproc.resize(grayPolar, grayPolar, new Size(0,0), 2.0, 1.0);
 
         double bionikoHeight = Math.min(limbusCircle[2]*BIONIKO_HEIGHT_P, grayPolar.rows());
+        // TODO: call only in the constructor and then resize (for performance reasons)
         writeBioniko(bionikoHeight);
 
         Imgproc.matchTemplate(grayPolar, bionikoGray, ccoeffNormed, Imgproc.TM_CCOEFF_NORMED);
-        Imgproc.rectangle(ccoeffNormed,
-                new Point(0, 0),
-                new Point(ccoeffNormed.width()*CCOEFF_NORMED_WIDTH_IGNORE_P,ccoeffNormed.height()),
-                new Scalar(0.0), Core.FILLED);
-        Imgproc.rectangle(ccoeffNormed,
-                new Point(ccoeffNormed.width()*(1 - CCOEFF_NORMED_WIDTH_IGNORE_P), 0),
-                new Point(ccoeffNormed.width(),ccoeffNormed.height()),
-                new Scalar(0.0), Core.FILLED);
 
         // TODO: add validation
-        MinMaxLocResult minMaxLocResult = Core.minMaxLoc(ccoeffNormed);
+        minMaxLocResult = Core.minMaxLoc(ccoeffNormed);
 
         // angle is measured in degrees; counterclockwise; starting at three hours
-        double bionikoAngle = 360*(minMaxLocResult.maxLoc.x / ccoeffNormed.width());
-
-        // TODO: debug; remove
-//        v = grayPolar.clone();
+        double bionikoAngle = 360.0*(minMaxLocResult.maxLoc.x / grayPolar.width());
 
         return bionikoAngle;
+    }
+
+    public Mat visualize() {
+        Mat vis = grayPolar.clone();
+        Imgproc.cvtColor(vis, vis, Imgproc.COLOR_GRAY2BGRA);
+        Imgproc.line(vis, new Point(minMaxLocResult.maxLoc.x, 0),
+                new Point(minMaxLocResult.maxLoc.x, vis.height()), new Scalar(0,255,0,255));
+
+        return vis;
     }
 
     private void writeBioniko(double bionikoHeight) {

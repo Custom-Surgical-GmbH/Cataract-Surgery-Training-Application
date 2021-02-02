@@ -6,6 +6,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class Overlays {
@@ -22,7 +23,7 @@ public class Overlays {
 
     // angle is measured in degrees; counterclockwise; starting at three hours
     public static void drawAxis(Mat img, Point center, double angle, double length, Scalar color) {
-        double angleRad = 2*Math.PI*angle/360;
+        double angleRad = 2*Math.PI*angle/360.0;
 
         Point direction = new Point(Math.cos(angleRad), -Math.sin(angleRad));
         Point lineStart = new Point(center.x + length*direction.x/2,
@@ -31,5 +32,12 @@ public class Overlays {
                 center.y - length*direction.y/2);
 
         Imgproc.line(img, lineStart, lineEnd, color, 3, Imgproc.LINE_AA);
+    }
+
+    public static void drawVisualization(Mat img, Mat vis, double fx) {
+        double newWidth = img.width()*fx;
+        double newHeight = newWidth / ((double) vis.width() / (double) vis.height());
+        Imgproc.resize(vis, vis, new Size(Math.round(newWidth), Math.round(newHeight)));
+        vis.copyTo(img.rowRange(0, vis.rows()).colRange(0, vis.cols()));
     }
 }

@@ -150,14 +150,16 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
 
         double[] limbusCircle = limbusDetectionHough.process(mGray);
         if (limbusCircle != null) {
-            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, limbusCircle, mTest);
+            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, limbusCircle);
+            Log.i(TAG, "bionikoAngle: " + bionikoAngle);
 
             Overlays.drawCircle(mRgba, limbusCircle, new Scalar(0,255,0,255));
             Overlays.drawAxis(mRgba, new Point(limbusCircle[0], limbusCircle[1]), bionikoAngle,
                     limbusCircle[2]*2, new Scalar(0,255,0,255));
 
             // TODO: debug; remove
-//            Imgproc.resize(mTest, mTest, new Size());
+            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
+            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
         }
 
 //        Imgproc.putText(mRgba, Double.toString(firstIncisionLength), new Point(100, 100), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
