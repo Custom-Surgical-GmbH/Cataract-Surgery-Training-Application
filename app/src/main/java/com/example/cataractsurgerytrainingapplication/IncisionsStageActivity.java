@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TimingLogger;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
@@ -32,6 +33,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class IncisionsStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
     private static final String TAG = "Incisions";
+
     public static final double FIRST_INCISION_LENGTH_DEFAULT = 5.0;
     public static final double FIRST_INCISION_ANGLE_DEFAULT = 90.0;
     public static final double SECOND_INCISION_LENGTH_DEFAULT = 3.0;
@@ -151,7 +153,7 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
         double[] limbusCircle = limbusDetectionHough.process(mGray);
         if (limbusCircle != null) {
             double bionikoAngle = bionikoDetectionCorrelation.process(mGray, limbusCircle);
-            Log.i(TAG, "bionikoAngle: " + bionikoAngle);
+//            Log.i(TAG, "bionikoAngle: " + bionikoAngle);
 
             Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
             double limbusRadius = limbusCircle[2];
@@ -172,11 +174,11 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
                     new Scalar(0,255,0,255));
 
             // TODO: debug; remove
-//            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));
-//            Overlays.drawAxis(mRgba, limbusCenter, bionikoAngle, limbusRadius*2,
-//                    new Scalar(0,255,0,255));
-//            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
-//            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
+            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));
+            Overlays.drawAxis(mRgba, limbusCenter, bionikoAngle, limbusRadius*2,
+                    new Scalar(0,255,0,255));
+            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
+            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
         }
 
         return mRgba;

@@ -135,6 +135,10 @@ public class CapsulotomyStageActivity extends Activity implements CameraBridgeVi
                     new Scalar(0,255,0,255));
 
             // TODO: debug; remove
+//            Overlays.drawCircle(mRgba,
+//                    limbusCenter,
+//                    limbusRadius,
+//                    new Scalar(0,255,0,255));
 //            Overlays.drawAxis(mRgba, limbusCenter, bionikoAngle, limbusRadius*2,
 //                    new Scalar(0,255,0,255));
 //            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
