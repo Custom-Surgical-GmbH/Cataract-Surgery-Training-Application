@@ -153,41 +153,31 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
             double bionikoAngle = bionikoDetectionCorrelation.process(mGray, limbusCircle);
             Log.i(TAG, "bionikoAngle: " + bionikoAngle);
 
-            Overlays.drawCircle(mRgba, limbusCircle, new Scalar(0,255,0,255));
-            Overlays.drawAxis(mRgba, new Point(limbusCircle[0], limbusCircle[1]), bionikoAngle,
-                    limbusCircle[2]*2, new Scalar(0,255,0,255));
+            Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
+            double limbusRadius = limbusCircle[2];
+
+            Overlays.drawIncision(mRgba,
+                    limbusCenter,
+                    bionikoAngle + firstIncisionAngle,
+                    limbusRadius,
+                    AnatomyHelpers.mmToPixels(limbusRadius, firstIncisionLength),
+                    AnatomyHelpers.mmToPixels(limbusRadius, firstIncisionLength)*0.1,
+                    new Scalar(0,255,0,255));
+            Overlays.drawIncision(mRgba,
+                    limbusCenter,
+                    bionikoAngle + secondIncisionAngle,
+                    limbusRadius,
+                    AnatomyHelpers.mmToPixels(limbusRadius, secondIncisionLength),
+                    AnatomyHelpers.mmToPixels(limbusRadius, secondIncisionLength)*0.1,
+                    new Scalar(0,255,0,255));
 
             // TODO: debug; remove
-            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
-            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
+//            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));
+//            Overlays.drawAxis(mRgba, limbusCenter, bionikoAngle, limbusRadius*2,
+//                    new Scalar(0,255,0,255));
+//            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
+//            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
         }
-
-//        Imgproc.putText(mRgba, Double.toString(firstIncisionLength), new Point(100, 100), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
-//        Imgproc.putText(mRgba, Double.toString(firstIncisionAngle), new Point(100, 150), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
-//        Imgproc.putText(mRgba, Double.toString(secondIncisionLength), new Point(100, 200), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
-//        Imgproc.putText(mRgba, Double.toString(secondIncisionAngle), new Point(100, 250), Core.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0,255));
-
-//        Bitmap b = Bitmap.createBitmap(500, 100, Bitmap.Config.ARGB_8888);
-//        b.eraseColor(Color.WHITE);
-//        Canvas c = new Canvas(b);
-//        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-//        p.setColor(Color.BLACK);
-//        p.setTextSize((float) (100*1.35));
-//        p.setTypeface(ResourcesCompat.getFont(this, R.font.century_gothic_bold));
-//        p.setTextAlign(Paint.Align.LEFT);
-//        Rect bounds = new Rect();
-//        String text = "BIONIKO";
-//        p.getTextBounds(text,0, text.length(), bounds);
-////        Log.i(TAG, bounds.toString());
-//        Log.i(TAG, String.valueOf(bounds.width()) + "x" + String.valueOf(bounds.height()));
-//        c.drawText(text, 0, 100, p);
-//
-//        Mat m = new Mat();
-//        Utils.bitmapToMat(b, m);
-//
-//        m.copyTo(mRgba.rowRange(0, m.rows()).colRange(0, m.cols()));
-
-
 
         return mRgba;
     }
