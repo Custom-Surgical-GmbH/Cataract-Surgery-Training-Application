@@ -21,23 +21,16 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
 public class CapsulotomyStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
-    private static final String TAG = "IncisionsStage";
-    public static final double FIRST_INCISION_LENGTH_DEFAULT = 5.0;
-    public static final double FIRST_INCISION_ANGLE_DEFAULT = 90.0;
-    public static final double SECOND_INCISION_LENGTH_DEFAULT = 3.0;
-    public static final double SECOND_INCISION_ANGLE_DEFAULT = 180.0;
+    private static final String TAG = "Capsulotomy";
+    public static final double CAPSULOTOMY_DIAMETER_DEFAULT = 5.0;
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private LimbusDetectionHough limbusDetectionHough;
-    private BionikoDetectionCorrelation bionikoDetectionCorrelation;
     private Mat mRgba;
     private Mat mGray;
     private Mat mTest;
 
-    private double firstIncisionLength;
-    private double firstIncisionAngle;
-    private double secondIncisionLength;
-    private double secondIncisionAngle;
+    private double capsulotomyDiameter;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -66,14 +59,8 @@ public class CapsulotomyStageActivity extends Activity implements CameraBridgeVi
 
         setContentView(R.layout.activity_incisions_stage);
 
-        firstIncisionLength = getIntent().getDoubleExtra("firstIncisionLength",
-                FIRST_INCISION_LENGTH_DEFAULT);
-        firstIncisionAngle = getIntent().getDoubleExtra("firstIncisionAngle",
-                FIRST_INCISION_ANGLE_DEFAULT);
-        secondIncisionLength = getIntent().getDoubleExtra("secondIncisionLength",
-                SECOND_INCISION_LENGTH_DEFAULT);
-        secondIncisionAngle = getIntent().getDoubleExtra("secondIncisionAngle",
-                SECOND_INCISION_ANGLE_DEFAULT);
+        capsulotomyDiameter = getIntent().getDoubleExtra("capsulotomyDiameter",
+                CAPSULOTOMY_DIAMETER_DEFAULT);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.OpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
@@ -115,7 +102,6 @@ public class CapsulotomyStageActivity extends Activity implements CameraBridgeVi
 //        Log.i(TAG, "Scaled height/width: " + mScaledHeight + "/" + mScaledWidth);
 
         limbusDetectionHough = new LimbusDetectionHough(width, height);
-        bionikoDetectionCorrelation = new BionikoDetectionCorrelation(this, width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
         mTest = new Mat();
@@ -140,29 +126,15 @@ public class CapsulotomyStageActivity extends Activity implements CameraBridgeVi
 
         double[] limbusCircle = limbusDetectionHough.process(mGray);
         if (limbusCircle != null) {
-            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, limbusCircle);
-            Log.i(TAG, "bionikoAngle: " + bionikoAngle);
-
             Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
             double limbusRadius = limbusCircle[2];
 
-            Overlays.drawIncision(mRgba,
+            Overlays.drawCircle(mRgba,
                     limbusCenter,
-                    bionikoAngle + firstIncisionAngle,
-                    limbusRadius,
-                    AnatomyHelpers.mmToPixels(limbusRadius, firstIncisionLength),
-                    AnatomyHelpers.mmToPixels(limbusRadius, firstIncisionLength)*0.1,
-                    new Scalar(0,255,0,255));
-            Overlays.drawIncision(mRgba,
-                    limbusCenter,
-                    bionikoAngle + secondIncisionAngle,
-                    limbusRadius,
-                    AnatomyHelpers.mmToPixels(limbusRadius, secondIncisionLength),
-                    AnatomyHelpers.mmToPixels(limbusRadius, secondIncisionLength)*0.1,
+                    AnatomyHelpers.mmToPixels(limbusRadius, capsulotomyDiameter)/2,
                     new Scalar(0,255,0,255));
 
             // TODO: debug; remove
-//            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));
 //            Overlays.drawAxis(mRgba, limbusCenter, bionikoAngle, limbusRadius*2,
 //                    new Scalar(0,255,0,255));
 //            Mat bionikoVis = bionikoDetectionCorrelation.visualize();

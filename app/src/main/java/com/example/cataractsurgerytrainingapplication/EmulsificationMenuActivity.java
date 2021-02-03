@@ -26,7 +26,7 @@ public class EmulsificationMenuActivity extends AppCompatActivity {
 //            return;
 //        }
 
-        Intent intent = new Intent(this, IncisionsStageActivity.class);
+        Intent intent = new Intent(this, EmulsificationStageActivity.class);
         if (safeZoneDiameterEditText.length() != 0) {
             intent.putExtra("safeZoneDiameter",
                     Double.parseDouble(safeZoneDiameterEditText.getText().toString()));

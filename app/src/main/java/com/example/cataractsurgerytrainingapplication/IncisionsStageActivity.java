@@ -31,7 +31,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class IncisionsStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
-    private static final String TAG = "IncisionsStage";
+    private static final String TAG = "Incisions";
     public static final double FIRST_INCISION_LENGTH_DEFAULT = 5.0;
     public static final double FIRST_INCISION_ANGLE_DEFAULT = 90.0;
     public static final double SECOND_INCISION_LENGTH_DEFAULT = 3.0;

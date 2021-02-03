@@ -26,7 +26,7 @@ public class CapsulotomyMenuActivity extends AppCompatActivity {
 //            return;
 //        }
 
-        Intent intent = new Intent(this, IncisionsStageActivity.class);
+        Intent intent = new Intent(this, CapsulotomyStageActivity.class);
         if (capsulotomyDiameterEditText.length() != 0) {
             intent.putExtra("capsulotomyDiameter",
                     Double.parseDouble(capsulotomyDiameterEditText.getText().toString()));

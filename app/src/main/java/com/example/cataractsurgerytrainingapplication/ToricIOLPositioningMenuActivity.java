@@ -28,7 +28,7 @@ public class ToricIOLPositioningMenuActivity extends AppCompatActivity {
 //            return;
 //        }
 
-        Intent intent = new Intent(this, IncisionsStageActivity.class);
+        Intent intent = new Intent(this, ToricIOLPositioningStageActivity.class);
         if (lensAxisAngleEditText.length() != 0) {
             intent.putExtra("lensAxisAngle",
                     Double.parseDouble(lensAxisAngleEditText.getText().toString()));
