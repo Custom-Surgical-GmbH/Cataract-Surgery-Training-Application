@@ -18,4 +18,19 @@ public class CataractSurgeryTrainingActivity extends AppCompatActivity {
         Intent intent = new Intent(this, IncisionsMenuActivity.class);
         startActivity(intent);
     }
+
+    public void startCapsulotomyMenu(View view) {
+        Intent intent = new Intent(this, CapsulotomyMenuActivity.class);
+        startActivity(intent);
+    }
+
+    public void startEmulsificationMenu(View view) {
+        Intent intent = new Intent(this, EmulsificationMenuActivity.class);
+        startActivity(intent);
+    }
+
+    public void startToricIOLPositioningMenu(View view) {
+        Intent intent = new Intent(this, ToricIOLPositioningMenuActivity.class);
+        startActivity(intent);
+    }
 }

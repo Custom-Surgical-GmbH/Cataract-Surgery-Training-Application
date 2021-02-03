@@ -24,7 +24,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CataractSurgeryTrainingApplication">
-        <activity android:name=".IncisionsMenuActivity"></activity>
+        <activity android:name=".ToricIOLPositioningMenuActivity" />
+        <activity android:name=".EmulsificationMenuActivity" />
+        <activity android:name=".CapsulotomyMenuActivity" />
+        <activity android:name=".IncisionsMenuActivity" />
         <activity android:name=".CataractSurgeryTrainingActivity" />
         <activity
             android:name=".VideoProcessingDemoActivity"
@@ -32,6 +35,18 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
         <activity
             android:name=".IncisionsStageActivity"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".ToricIOLPositioningStageActivity"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".EmulsificationStageActivity"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".CapsulotomyStageActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
         <activity android:name=".LimbusDetectionDemoActivity" />

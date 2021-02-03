@@ -140,17 +140,4 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="12dp"
-        android:layout_marginBottom="12dp"
-        android:insetTop="12dp"
-        android:insetBottom="0dp"
-        android:text="next"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
