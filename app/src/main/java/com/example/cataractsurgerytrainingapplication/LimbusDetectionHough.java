@@ -48,6 +48,9 @@ public class LimbusDetectionHough {
             bestCircle[i] = bestCircle[i] / scale;
         }
 
+        // clean up
+//        circles.release();
+
         return bestCircle;
     }
 }

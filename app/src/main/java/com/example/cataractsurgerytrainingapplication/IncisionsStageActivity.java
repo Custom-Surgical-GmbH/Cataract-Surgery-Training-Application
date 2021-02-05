@@ -44,6 +44,7 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
     private BionikoDetectionCorrelation bionikoDetectionCorrelation;
     private Mat mRgba;
     private Mat mGray;
+    private Mat mValue;
     private Mat mTest;
 
     private double firstIncisionLength;
@@ -130,13 +131,15 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
         bionikoDetectionCorrelation = new BionikoDetectionCorrelation(this, width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
-        mTest = new Mat();
+        mValue = new Mat(height, width, CvType.CV_8UC1);
+        mTest = new Mat(height, width, CvType.CV_8UC3);
     }
 
     @Override
     public void onCameraViewStopped() {
         mRgba.release();
         mGray.release();
+        mValue.release();
         mTest.release();
     }
 
@@ -149,15 +152,19 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
+        Imgproc.cvtColor(mRgba, mTest, Imgproc.COLOR_RGBA2RGB);
+        Imgproc.cvtColor(mTest, mTest, Imgproc.COLOR_RGB2HSV);
+        Core.extractChannel(mTest, mValue, 2);
 
         double[] limbusCircle = limbusDetectionHough.process(mGray);
         if (limbusCircle != null) {
-            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, limbusCircle);
+            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, mValue, limbusCircle);
 //            Log.i(TAG, "bionikoAngle: " + bionikoAngle);
 
             Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
             double limbusRadius = limbusCircle[2];
 
+            // stage-specific overlays
             Overlays.drawIncision(mRgba,
                     limbusCenter,
                     bionikoAngle + firstIncisionAngle,
@@ -173,12 +180,22 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
                     AnatomyHelpers.mmToPixels(limbusRadius, secondIncisionLength)*0.1,
                     new Scalar(0,255,0,255));
 
+            // helper overlays
+            Overlays.drawAxis(mRgba,
+                    limbusCenter,
+                    bionikoAngle,
+                    limbusRadius*2,
+                    new Scalar(0,0,255,255));
+
             // TODO: debug; remove
-            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));
-            Overlays.drawAxis(mRgba, limbusCenter, bionikoAngle, limbusRadius*2,
-                    new Scalar(0,255,0,255));
-            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
-            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
+//            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));
+//            Overlays.drawAxis(mRgba, limbusCenter, bionikoAngle, limbusRadius*2,
+//                    new Scalar(0,255,0,255));
+//            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
+//            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
+//
+//            // clean up
+//            bionikoVis.release();
         }
 
         return mRgba;

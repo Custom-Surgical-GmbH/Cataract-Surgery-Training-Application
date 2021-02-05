@@ -15,10 +15,12 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 public class ToricIOLPositioningStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
     private static final String TAG = "ToricIOLPositioning";
@@ -29,6 +31,7 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
     private BionikoDetectionCorrelation bionikoDetectionCorrelation;
     private Mat mRgba;
     private Mat mGray;
+    private Mat mValue;
     private Mat mTest;
 
     private double lensAxisAngle;
@@ -106,13 +109,15 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
         bionikoDetectionCorrelation = new BionikoDetectionCorrelation(this, width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
-        mTest = new Mat();
+        mValue = new Mat(height, width, CvType.CV_8UC1);
+        mTest = new Mat(height, width, CvType.CV_8UC3);
     }
 
     @Override
     public void onCameraViewStopped() {
         mRgba.release();
         mGray.release();
+        mValue.release();
         mTest.release();
     }
 
@@ -125,20 +130,43 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
+        Imgproc.cvtColor(mRgba, mTest, Imgproc.COLOR_RGBA2RGB);
+        Imgproc.cvtColor(mTest, mTest, Imgproc.COLOR_RGB2HSV);
+        Core.extractChannel(mTest, mValue, 2);
 
         double[] limbusCircle = limbusDetectionHough.process(mGray);
         if (limbusCircle != null) {
-            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, limbusCircle);
+            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, mValue, limbusCircle);
             Log.i(TAG, "bionikoAngle: " + bionikoAngle);
 
             Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
             double limbusRadius = limbusCircle[2];
 
+            // stage-specific overlays
             Overlays.drawAxis(mRgba,
                     limbusCenter,
                     bionikoAngle + lensAxisAngle,
                     limbusRadius*2,
                     new Scalar(0,255,0,255));
+            Overlays.drawAxis(mRgba,
+                    limbusCenter,
+                    bionikoAngle + lensAxisAngle,
+                    limbusRadius*2,
+                    new Scalar(0,255,0,255),
+                    limbusRadius*0.1);
+            Overlays.drawAxis(mRgba,
+                    limbusCenter,
+                    bionikoAngle + lensAxisAngle,
+                    limbusRadius*2,
+                    new Scalar(0,255,0,255),
+                    -limbusRadius*0.1);
+
+            // helper overlays
+            Overlays.drawAxis(mRgba,
+                    limbusCenter,
+                    bionikoAngle,
+                    limbusRadius*2,
+                    new Scalar(0,0,255,255));
 
             // TODO: debug; remove
 //            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));

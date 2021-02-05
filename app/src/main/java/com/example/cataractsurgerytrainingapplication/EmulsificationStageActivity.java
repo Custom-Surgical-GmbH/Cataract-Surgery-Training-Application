@@ -129,10 +129,17 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
                         Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
             double limbusRadius = limbusCircle[2];
 
+            // stage-specific overlays
             Overlays.drawCircle(mRgba,
                     limbusCenter,
                     AnatomyHelpers.mmToPixels(limbusRadius, safeZoneDiameter)/2,
                     new Scalar(0,255,0,255));
+
+            // helper overlays
+            Overlays.drawCircle(mRgba,
+                    limbusCenter,
+                    limbusRadius,
+                    new Scalar(0,0,255,255));
 
             // TODO: debug; remove
 //            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));

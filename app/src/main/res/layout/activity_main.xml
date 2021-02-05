@@ -39,6 +39,21 @@
         app:layout_constraintTop_toBottomOf="@+id/limbusDetectionDemoBtn" />
 
     <Button
+        android:id="@+id/memoryLeakTestBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:onClick="startMemoryLeakTestActivity"
+        android:text="memory leak test"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/videoProcessingDemoBtn" />
+
+    <Button
         android:id="@+id/cataractSurgeryTrainingBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -51,6 +66,6 @@
         android:text="cataract surgery training"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/videoProcessingDemoBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/memoryLeakTestBtn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

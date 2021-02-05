@@ -37,10 +37,10 @@ public class BionikoDetectionCorrelation {
     private Mat grayPolar;
     private Bitmap bionikoBm;
     Rect bionikoBounds;
-    MinMaxLocResult minMaxLocResult;
     private Mat bionikoGray;
     private Mat bionikoGrayScaled;
     private Mat ccoeffNormed;
+    MinMaxLocResult minMaxLocResult;
 
     public BionikoDetectionCorrelation(Context context, int width, int height) {
         gray = new Mat(height, width, CvType.CV_8UC1);
@@ -59,7 +59,7 @@ public class BionikoDetectionCorrelation {
 
     // TODO: do multiple matchings to also check for blind angles (move polar coordinates by 180)
     //  and visibility in various color spaces
-    public double process(Mat newGray, double[] limbusCircle) {
+    public double process(Mat newGray, Mat newValue, double[] limbusCircle) {
         this.limbusCircle = limbusCircle;
         gray = newGray;
         Imgproc.warpPolar(gray,
@@ -79,13 +79,39 @@ public class BionikoDetectionCorrelation {
         // TODO: call only in the constructor and then resize (for performance reasons)
         Imgproc.resize(bionikoGray, bionikoGrayScaled, new Size(bionikoWidth, bionikoHeight));
 
+        // gray
         Imgproc.matchTemplate(grayPolar, bionikoGrayScaled, ccoeffNormed, Imgproc.TM_CCOEFF_NORMED);
+        MinMaxLocResult minMaxLocResultGray = Core.minMaxLoc(ccoeffNormed);
+
+        // value
+        gray = newValue;
+        Imgproc.warpPolar(gray,
+                grayPolar,
+                POLAR_SIZE,
+                new Point(limbusCircle[0], limbusCircle[1]),
+                limbusCircle[2],
+                Imgproc.WARP_POLAR_LINEAR);
+        Core.rotate(grayPolar, grayPolar, Core.ROTATE_90_CLOCKWISE);
+        grayPolar = grayPolar.submat((int) ((1.0 - (BIONIKO_HEIGHT_P + 0.05))*grayPolar.rows()),
+                grayPolar.rows(),
+                0,
+                grayPolar.cols());
+        Imgproc.matchTemplate(grayPolar, bionikoGrayScaled, ccoeffNormed, Imgproc.TM_CCOEFF_NORMED);
+        MinMaxLocResult minMaxLocResultValue = Core.minMaxLoc(ccoeffNormed);
 
         // TODO: add validation
-        minMaxLocResult = Core.minMaxLoc(ccoeffNormed);
-
         // angle is measured in degrees; counterclockwise; starting at three hours
+
+        if (minMaxLocResultGray.maxVal > minMaxLocResultValue.maxVal) {
+            minMaxLocResult = minMaxLocResultGray;
+        } else {
+            minMaxLocResult = minMaxLocResultValue;
+        }
+
         double bionikoAngle = 360.0*(minMaxLocResult.maxLoc.x / grayPolar.width());
+
+        // clean up
+        gray.release();
 
         return bionikoAngle;
     }
@@ -105,6 +131,9 @@ public class BionikoDetectionCorrelation {
 
         Utils.bitmapToMat(bionikoBm, bionikoRgba);
         Imgproc.cvtColor(bionikoRgba, bionikoGray, Imgproc.COLOR_BGRA2GRAY);
+
+        // clean up
+        bionikoRgba.release();
     }
 
     public Mat visualize() {
@@ -118,6 +147,9 @@ public class BionikoDetectionCorrelation {
         bionikoRgbaScaled.copyTo(
                 vis.rowRange(0, bionikoRgbaScaled.rows()).colRange(vis.cols() - bionikoRgbaScaled.cols(),
                         vis.cols()));
+
+        // clean up
+        bionikoRgbaScaled.release();
 
         return vis;
     }
