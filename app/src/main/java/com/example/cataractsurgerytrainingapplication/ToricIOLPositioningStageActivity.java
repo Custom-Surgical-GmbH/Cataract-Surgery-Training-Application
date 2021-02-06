@@ -25,7 +25,7 @@ import org.opencv.imgproc.Imgproc;
 public class ToricIOLPositioningStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
     private static final String TAG = "ToricIOLPositioning";
     public static final double LENS_AXIS_ANGLE_DEFAULT = 90.0;
-    public static final double LENS_AXIS_SHIFT_P = 0.1;
+    public static final double LENS_AXIS_SHIFT_P = 0.05;
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private LimbusDetectionHough limbusDetectionHough;

@@ -10,6 +10,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -23,6 +24,7 @@ public class LimbusDetectionHough {
     private final int scaledHeight;
     private final int scaledWidth;
     private Mat grayScaled;
+    private Mat blurredNegativeScaled;
     private Mat laplacianScaled;
     private Mat laplacianMask;
     private Mat laplacianMasked;
@@ -37,6 +39,7 @@ public class LimbusDetectionHough {
         scaledHeight = (int) Math.round(height * scale);
         scaledWidth = (int) Math.round(width * scale);
         grayScaled = new Mat(scaledHeight, scaledWidth, CvType.CV_8UC1);
+        blurredNegativeScaled = new Mat(scaledHeight, scaledWidth, CvType.CV_8UC1);
         laplacianScaled = new Mat(scaledHeight, scaledWidth, CvType.CV_16SC1);
         laplacianMasked = new Mat(scaledHeight, scaledWidth, CvType.CV_16SC1);
         laplacianMask = new Mat(scaledHeight, scaledWidth, CvType.CV_8UC1);
@@ -46,9 +49,9 @@ public class LimbusDetectionHough {
     public double[] process(Mat newGray) {
         gray = newGray;
         Imgproc.resize(gray, grayScaled, new Size(scaledWidth, scaledHeight));
-        Core.subtract(whiteScaled, grayScaled, grayScaled);
-        Imgproc.GaussianBlur(grayScaled, grayScaled, new Size(0,0), 2);
-        Imgproc.HoughCircles(grayScaled,
+        Core.subtract(whiteScaled, grayScaled, blurredNegativeScaled);
+        Imgproc.GaussianBlur(blurredNegativeScaled, blurredNegativeScaled, new Size(0,0), 2);
+        Imgproc.HoughCircles(blurredNegativeScaled,
                 circles,
                 Imgproc.HOUGH_GRADIENT,
                 1.0,
@@ -104,7 +107,7 @@ public class LimbusDetectionHough {
                 new Point(circle[0], circle[1]),
                 (int) Math.round(circle[2]),
                 new Scalar(255),
-                2);
+                (int) Math.max (circle[2]*0.03,1));
         laplacian.copyTo(laplacianMasked, laplacianMask);
         Core.absdiff(laplacianMasked, new Scalar(0), laplacianMasked);
 
