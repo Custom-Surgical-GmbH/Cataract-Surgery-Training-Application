@@ -54,6 +54,21 @@
         app:layout_constraintTop_toBottomOf="@+id/videoProcessingDemoBtn" />
 
     <Button
+        android:id="@+id/nativeVideoProcessingDemoBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:onClick="startNativeVideoProcessingDemoActivity"
+        android:text="native video processing demo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/memoryLeakTestBtn" />
+
+    <Button
         android:id="@+id/cataractSurgeryTrainingBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -66,6 +81,6 @@
         android:text="cataract surgery training"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/memoryLeakTestBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/nativeVideoProcessingDemoBtn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

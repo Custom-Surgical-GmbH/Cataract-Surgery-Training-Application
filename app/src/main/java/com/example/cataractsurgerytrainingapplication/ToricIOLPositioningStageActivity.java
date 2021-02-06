@@ -25,6 +25,7 @@ import org.opencv.imgproc.Imgproc;
 public class ToricIOLPositioningStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
     private static final String TAG = "ToricIOLPositioning";
     public static final double LENS_AXIS_ANGLE_DEFAULT = 90.0;
+    public static final double LENS_AXIS_SHIFT_P = 0.1;
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private LimbusDetectionHough limbusDetectionHough;
@@ -61,13 +62,14 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_incisions_stage);
+        setContentView(R.layout.activity_video_processing);
 
         lensAxisAngle = getIntent().getDoubleExtra("lensAxisAngle",
                 LENS_AXIS_ANGLE_DEFAULT);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.OpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCameraPermissionGranted();
         mOpenCvCameraView.setCvCameraViewListener(this);
         mOpenCvCameraView.setCameraIndex(0); // TODO: let the user select
     }
@@ -85,7 +87,7 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -153,13 +155,13 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
                     bionikoAngle + lensAxisAngle,
                     limbusRadius*2,
                     new Scalar(0,255,0,255),
-                    limbusRadius*0.1);
+                    limbusRadius*LENS_AXIS_SHIFT_P);
             Overlays.drawAxis(mRgba,
                     limbusCenter,
                     bionikoAngle + lensAxisAngle,
                     limbusRadius*2,
                     new Scalar(0,255,0,255),
-                    -limbusRadius*0.1);
+                    -limbusRadius*LENS_AXIS_SHIFT_P);
 
             // helper overlays
             Overlays.drawAxis(mRgba,

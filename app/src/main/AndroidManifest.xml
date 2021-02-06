@@ -53,6 +53,10 @@
             android:name=".MemoryLeakTestActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".NativeVideoProcessingDemoActivity"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
         <activity android:name=".LimbusDetectionDemoActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

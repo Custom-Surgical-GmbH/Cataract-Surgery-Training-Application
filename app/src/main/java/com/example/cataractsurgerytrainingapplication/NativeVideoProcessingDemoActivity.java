@@ -22,18 +22,13 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class CapsulotomyStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
-    private static final String TAG = "Capsulotomy";
-    public static final double CAPSULOTOMY_DIAMETER_DEFAULT = 5.0;
+public class NativeVideoProcessingDemoActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
+    private static final String TAG = "NativeVideoProcessing";
 
     private CameraBridgeViewBase mOpenCvCameraView;
-    private LimbusDetectionHough limbusDetectionHough;
     private Mat mRgba;
     private Mat mGray;
-    private Mat mHsv;
-    private Mat mValue;
 
-    private double capsulotomyDiameter;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -41,9 +36,12 @@ public class CapsulotomyStageActivity extends Activity implements CameraBridgeVi
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS:
                 {
+                    // Load native library after OpenCV initialization
+                    System.loadLibrary("opencv_java4");
+                    System.loadLibrary("native-lib");
+
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCvCameraView.enableView();
-                    mOpenCvCameraView.setOnTouchListener(CapsulotomyStageActivity.this);
                 } break;
                 default:
                 {
@@ -61,9 +59,6 @@ public class CapsulotomyStageActivity extends Activity implements CameraBridgeVi
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.activity_video_processing);
-
-        capsulotomyDiameter = getIntent().getDoubleExtra("capsulotomyDiameter",
-                CAPSULOTOMY_DIAMETER_DEFAULT);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.OpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
@@ -103,67 +98,26 @@ public class CapsulotomyStageActivity extends Activity implements CameraBridgeVi
     @Override
     public void onCameraViewStarted(int width, int height) {
         Log.i(TAG, Integer.toString(width) + "x" + Integer.toString(height));
-//        Log.i(TAG, "Scaled height/width: " + mScaledHeight + "/" + mScaledWidth);
 
-        limbusDetectionHough = new LimbusDetectionHough(width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
-        mValue = new Mat(height, width, CvType.CV_8UC1);
-        mHsv = new Mat(height, width, CvType.CV_8UC3);
     }
 
     @Override
     public void onCameraViewStopped() {
         mRgba.release();
         mGray.release();
-        mValue.release();
-        mHsv.release();
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        return false;
     }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
-        Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGBA2RGB);
-        Imgproc.cvtColor(mHsv, mHsv, Imgproc.COLOR_RGB2HSV);
-        Core.extractChannel(mHsv, mValue, 2);
 
-        double[] limbusCircle = limbusDetectionHough.process(mValue);
-        if (limbusCircle != null) {
-            Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
-            double limbusRadius = limbusCircle[2];
-
-            // stage-specific overlays
-            Overlays.drawCircle(mRgba,
-                    limbusCenter,
-                    AnatomyHelpers.mmToPixels(limbusRadius, capsulotomyDiameter)/2,
-                    new Scalar(0,255,0,255));
-
-            // helper overlays
-            Overlays.drawCircle(mRgba,
-                    limbusCenter,
-                    limbusRadius,
-                    new Scalar(0,0,255,255),
-                    false);
-
-            // TODO: debug; remove
-//            Overlays.drawCircle(mRgba,
-//                    limbusCenter,
-//                    limbusRadius,
-//                    new Scalar(0,255,0,255));
-//            Overlays.drawAxis(mRgba, limbusCenter, bionikoAngle, limbusRadius*2,
-//                    new Scalar(0,255,0,255));
-//            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
-//            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
-
-            // clean up
-        }
+        NativeCanny(mGray.getNativeObjAddr(), mRgba.getNativeObjAddr());
 
         return mRgba;
     }
+
+    public native void NativeCanny(long matAddrGr, long matAddrRgba);
 }

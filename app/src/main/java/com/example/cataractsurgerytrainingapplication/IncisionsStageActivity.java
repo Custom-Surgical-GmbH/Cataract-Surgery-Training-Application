@@ -16,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -31,7 +32,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-public class IncisionsStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
+public class IncisionsStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String TAG = "Incisions";
 
     public static final double FIRST_INCISION_LENGTH_DEFAULT = 5.0;
@@ -45,7 +46,7 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
     private Mat mRgba;
     private Mat mGray;
     private Mat mValue;
-    private Mat mTest;
+    private Mat mHsv;
 
     private double firstIncisionLength;
     private double firstIncisionAngle;
@@ -60,7 +61,6 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCvCameraView.enableView();
-                    mOpenCvCameraView.setOnTouchListener(IncisionsStageActivity.this);
                 } break;
                 default:
                 {
@@ -77,7 +77,7 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_incisions_stage);
+        setContentView(R.layout.activity_video_processing);
 
         firstIncisionLength = getIntent().getDoubleExtra("firstIncisionLength",
                 FIRST_INCISION_LENGTH_DEFAULT);
@@ -90,6 +90,7 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.OpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCameraPermissionGranted();
         mOpenCvCameraView.setCvCameraViewListener(this);
         mOpenCvCameraView.setCameraIndex(0); // TODO: let the user select
     }
@@ -107,7 +108,7 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -132,7 +133,7 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
         mValue = new Mat(height, width, CvType.CV_8UC1);
-        mTest = new Mat(height, width, CvType.CV_8UC3);
+        mHsv = new Mat(height, width, CvType.CV_8UC3);
     }
 
     @Override
@@ -140,23 +141,18 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
         mRgba.release();
         mGray.release();
         mValue.release();
-        mTest.release();
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        return false;
+        mHsv.release();
     }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
-        Imgproc.cvtColor(mRgba, mTest, Imgproc.COLOR_RGBA2RGB);
-        Imgproc.cvtColor(mTest, mTest, Imgproc.COLOR_RGB2HSV);
-        Core.extractChannel(mTest, mValue, 2);
+        Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGBA2RGB);
+        Imgproc.cvtColor(mHsv, mHsv, Imgproc.COLOR_RGB2HSV);
+        Core.extractChannel(mHsv, mValue, 2);
 
-        double[] limbusCircle = limbusDetectionHough.process(mGray);
+        double[] limbusCircle = limbusDetectionHough.process(mValue);
         if (limbusCircle != null) {
             double bionikoAngle = bionikoDetectionCorrelation.process(mGray, mValue, limbusCircle);
 //            Log.i(TAG, "bionikoAngle: " + bionikoAngle);
@@ -200,4 +196,5 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
 
         return mRgba;
     }
+
 }

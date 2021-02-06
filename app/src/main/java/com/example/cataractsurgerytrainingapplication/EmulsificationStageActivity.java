@@ -1,7 +1,5 @@
 package com.example.cataractsurgerytrainingapplication;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,10 +13,12 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 public class EmulsificationStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
     private static final String TAG = "Emulsification";
@@ -28,7 +28,8 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
     private LimbusDetectionHough limbusDetectionHough;
     private Mat mRgba;
     private Mat mGray;
-    private Mat mTest;
+    private Mat mHsv;
+    private Mat mValue;
 
     private double safeZoneDiameter;
 
@@ -57,13 +58,14 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_incisions_stage);
+        setContentView(R.layout.activity_video_processing);
 
         safeZoneDiameter = getIntent().getDoubleExtra("safeZoneDiameter",
                 SAFE_ZONE_DIAMETER_DEFAULT);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.OpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCameraPermissionGranted();
         mOpenCvCameraView.setCvCameraViewListener(this);
         mOpenCvCameraView.setCameraIndex(0); // TODO: let the user select
     }
@@ -81,7 +83,7 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -104,14 +106,16 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
         limbusDetectionHough = new LimbusDetectionHough(width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
-        mTest = new Mat();
+        mValue = new Mat(height, width, CvType.CV_8UC1);
+        mHsv = new Mat(height, width, CvType.CV_8UC3);
     }
 
     @Override
     public void onCameraViewStopped() {
         mRgba.release();
         mGray.release();
-        mTest.release();
+        mHsv.release();
+        mValue.release();
     }
 
     @Override
@@ -123,8 +127,11 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
+        Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGBA2RGB);
+        Imgproc.cvtColor(mHsv, mHsv, Imgproc.COLOR_RGB2HSV);
+        Core.extractChannel(mHsv, mValue, 2);
 
-        double[] limbusCircle = limbusDetectionHough.process(mGray);
+        double[] limbusCircle = limbusDetectionHough.process(mValue);
         if (limbusCircle != null) {
                         Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
             double limbusRadius = limbusCircle[2];
