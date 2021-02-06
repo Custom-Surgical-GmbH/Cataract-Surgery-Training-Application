@@ -139,7 +139,8 @@ public class CapsulotomyStageActivity extends Activity implements CameraBridgeVi
             Overlays.drawCircle(mRgba,
                     limbusCenter,
                     limbusRadius,
-                    new Scalar(0,0,255,255));
+                    new Scalar(0,0,255,255),
+                    false);
 
             // TODO: debug; remove
 //            Overlays.drawCircle(mRgba,

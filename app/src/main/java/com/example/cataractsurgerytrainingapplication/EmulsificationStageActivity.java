@@ -139,7 +139,8 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
             Overlays.drawCircle(mRgba,
                     limbusCenter,
                     limbusRadius,
-                    new Scalar(0,0,255,255));
+                    new Scalar(0,0,255,255),
+                    false);
 
             // TODO: debug; remove
 //            Overlays.drawCircle(mRgba, limbusCenter, limbusRadius, new Scalar(0,255,0,255));
