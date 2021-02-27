@@ -1,7 +1,5 @@
 package com.example.cataractsurgerytrainingapplication;
 
-import android.util.Log;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -10,13 +8,10 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.time.temporal.TemporalAccessor;
-import java.util.Arrays;
-import java.util.Collections;
-
 public class LimbusDetectionHough {
     public static final int MAX_CIRCLES_PROCESSED = 10;
-    public static final double DESIRED_WIDTH_SIZE = 640.0;
+    public static final boolean LIMBUS_VALIDATION = false;
+    public static final double DESIRED_BIGGER_SIZE = 640.0;
 
     private Mat gray;
     private Mat circles;
@@ -35,7 +30,7 @@ public class LimbusDetectionHough {
         gray = new Mat(height, width, CvType.CV_8UC1);
         circles = new Mat();
 
-        scale = DESIRED_WIDTH_SIZE / (double) Math.max(width, height);
+        scale = DESIRED_BIGGER_SIZE / (double) Math.max(width, height);
         scaledHeight = (int) Math.round(height * scale);
         scaledWidth = (int) Math.round(width * scale);
         grayScaled = new Mat(scaledHeight, scaledWidth, CvType.CV_8UC1);
@@ -67,29 +62,29 @@ public class LimbusDetectionHough {
         }
 
         // TODO: add validation; don't pick the first circle naively
-        // naive
-//        double[] bestCircle = circles.get(0, 0);
-//        for (int i = 0; i < 3; i++) {
-//            bestCircle[i] = bestCircle[i] / scale;
-//        }
-
-        // robust
-        Imgproc.Laplacian(grayScaled, laplacianScaled, CvType.CV_16SC1);
-        int processedCircles = Math.min(MAX_CIRCLES_PROCESSED, circles.cols());
-        double[] currentCircle;
         double[] bestCircle = new double[3];
-        double avgLaplacian;
-        double maxAvgLaplacian = -1;
-        for (int i = 0; i < processedCircles; i++) {
-            currentCircle = circles.get(0, i);
-            avgLaplacian = compute_avg_laplacian(laplacianScaled, currentCircle);
+        // naive
+        if (LIMBUS_VALIDATION) {
+            Imgproc.Laplacian(grayScaled, laplacianScaled, CvType.CV_16SC1);
+            int processedCircles = Math.min(MAX_CIRCLES_PROCESSED, circles.cols());
+            double[] currentCircle;
+            double avgLaplacian;
+            double maxAvgLaplacian = -1;
+            for (int i = 0; i < processedCircles; i++) {
+                currentCircle = circles.get(0, i);
+                avgLaplacian = compute_avg_laplacian(laplacianScaled, currentCircle);
 
-            if (avgLaplacian > maxAvgLaplacian) {
-                maxAvgLaplacian = avgLaplacian;
-                bestCircle = currentCircle;
+                if (avgLaplacian > maxAvgLaplacian) {
+                    maxAvgLaplacian = avgLaplacian;
+                    bestCircle = currentCircle;
+                }
             }
+
+        } else {
+            bestCircle = circles.get(0, 0);
         }
 
+        // rescaling
         for (int i = 0; i < 3; i++) {
             bestCircle[i] = bestCircle[i] / scale;
         }
