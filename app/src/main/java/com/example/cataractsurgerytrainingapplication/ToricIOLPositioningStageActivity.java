@@ -29,11 +29,13 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private LimbusDetectionHough limbusDetectionHough;
-    private BionikoDetectionCorrelation bionikoDetectionCorrelation;
+//    private BionikoDetectionCorrelation bionikoDetectionCorrelation;
+    private ColorMarkersDetectionHuMoments colorMarkersDetectionHuMoments;
     private Mat mRgba;
+    private Mat mRgb;
+    private Mat mHsv;
     private Mat mGray;
     private Mat mValue;
-    private Mat mTest;
 
     private double lensAxisAngle;
 
@@ -108,19 +110,22 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 //        Log.i(TAG, "Scaled height/width: " + mScaledHeight + "/" + mScaledWidth);
 
         limbusDetectionHough = new LimbusDetectionHough(width, height);
-        bionikoDetectionCorrelation = new BionikoDetectionCorrelation(this, width, height);
+//        bionikoDetectionCorrelation = new BionikoDetectionCorrelation(this, width, height);
+        colorMarkersDetectionHuMoments = new ColorMarkersDetectionHuMoments(width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
+        mRgb = new Mat(height, width, CvType.CV_8UC3);
+        mHsv = new Mat(height, width, CvType.CV_8UC3);
         mGray = new Mat(height, width, CvType.CV_8UC1);
         mValue = new Mat(height, width, CvType.CV_8UC1);
-        mTest = new Mat(height, width, CvType.CV_8UC3);
     }
 
     @Override
     public void onCameraViewStopped() {
         mRgba.release();
+        mRgb.release();
+        mHsv.release();
         mGray.release();
         mValue.release();
-        mTest.release();
     }
 
     @Override
@@ -132,14 +137,16 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
-        Imgproc.cvtColor(mRgba, mTest, Imgproc.COLOR_RGBA2RGB);
-        Imgproc.cvtColor(mTest, mTest, Imgproc.COLOR_RGB2HSV);
-        Core.extractChannel(mTest, mValue, 2);
+        Imgproc.cvtColor(mRgba, mRgb, Imgproc.COLOR_RGBA2RGB);
+        Imgproc.cvtColor(mRgb, mHsv, Imgproc.COLOR_RGB2HSV);
+        Core.extractChannel(mHsv, mValue, 2);
 
         double[] limbusCircle = limbusDetectionHough.process(mGray);
         if (limbusCircle != null) {
-            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, mValue, limbusCircle);
-            Log.i(TAG, "bionikoAngle: " + bionikoAngle);
+//            double bionikoAngle = bionikoDetectionCorrelation.process(mGray, mValue, limbusCircle);
+//            Log.i(TAG, "bionikoAngle: " + bionikoAngle);
+            double zerothAngle = colorMarkersDetectionHuMoments.process(mHsv, limbusCircle);
+            Log.i(TAG, "zerothAngle (red strip): " + zerothAngle);
 
             Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
             double limbusRadius = limbusCircle[2];
@@ -147,18 +154,18 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
             // stage-specific overlays
             Overlays.drawAxis(mRgba,
                     limbusCenter,
-                    bionikoAngle + lensAxisAngle,
+                    zerothAngle + lensAxisAngle,
                     limbusRadius*2,
                     new Scalar(0,255,0,255));
             Overlays.drawAxis(mRgba,
                     limbusCenter,
-                    bionikoAngle + lensAxisAngle,
+                    zerothAngle + lensAxisAngle,
                     limbusRadius*2,
                     new Scalar(0,255,0,255),
                     limbusRadius*LENS_AXIS_SHIFT_P);
             Overlays.drawAxis(mRgba,
                     limbusCenter,
-                    bionikoAngle + lensAxisAngle,
+                    zerothAngle + lensAxisAngle,
                     limbusRadius*2,
                     new Scalar(0,255,0,255),
                     -limbusRadius*LENS_AXIS_SHIFT_P);
@@ -166,7 +173,7 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
             // helper overlays
             Overlays.drawAxis(mRgba,
                     limbusCenter,
-                    bionikoAngle,
+                    zerothAngle,
                     limbusRadius*2,
                     new Scalar(0,0,255,255));
 
@@ -176,6 +183,8 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 //                    new Scalar(0,255,0,255));
 //            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
 //            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
+            Mat colorMarkersVis = colorMarkersDetectionHuMoments.visualize();
+            Overlays.drawVisualization(mRgba, colorMarkersVis, 0.5);
         }
 
         return mRgba;
