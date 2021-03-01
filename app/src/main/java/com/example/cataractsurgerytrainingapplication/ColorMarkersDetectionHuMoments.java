@@ -26,19 +26,23 @@ public class ColorMarkersDetectionHuMoments {
     public static final Scalar RED_UPPER_THRESHOLD_2 = new Scalar(15, 240, 230);
     public static final Scalar GREEN_LOWER_THRESHOLD = new Scalar(40, 40, 75);
     public static final Scalar GREEN_UPPER_THRESHOLD = new Scalar(100, 240, 230);
-    public static final Scalar BLUE_LOWER_THRESHOLD = new Scalar(100, 40, 25);
-    public static final Scalar BLUE_UPPER_THRESHOLD = new Scalar(150, 240, 190);
+    public static final Scalar BLUE_LOWER_THRESHOLD = new Scalar(110, 25, 75);
+    public static final Scalar BLUE_UPPER_THRESHOLD = new Scalar(160, 165, 190);
     public static final Scalar BLACK_LOWER_THRESHOLD = new Scalar(0, 0, 0); // TODO
     public static final Scalar BLACK_UPPER_THRESHOLD = new Scalar(179, 40, 170); // TODO
 
-    public static final double SCLERA_TO_LIMBUS_RATIO = 1.7;
-    public static final double PLANAR_SCLERA_TO_LIMBUS_RATIO = 1.25;
+//    public static final double SCLERA_TO_LIMBUS_RATIO = 1.7;
+//    public static final int POLAR_SCLERA_RESOLUTION = 47;
+//    public static final double PLANAR_SCLERA_TO_LIMBUS_RATIO = 1.25;
+//    public static final int POLAR_PLANAR_SCLERA_RESOLUTION = 23;
+    public static final double PLANAR_SCLERA_TO_LIMBUS_RATIO = 1.7; // TODO: provisional
+    public static final int POLAR_PLANAR_SCLERA_RESOLUTION = 43; // TODO: provisional
+
     public static final String HU_MOMENT_DECIDER = "mu02";
 
     public static final int POLAR_ANGLE_RESOLUTION = 720;
     public static final int POLAR_ANGLE_SPLIT = 180;
     public static final int POLAR_RADIUS_RESOLUTION = 115;
-    public static final int POLAR_PLANAR_SCLERA_RESOLUTION = 23;
     public static final int POLAR_HU_MOMENT_NEIGHBORS = 20;
 
     private Mat hsv;
