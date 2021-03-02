@@ -29,7 +29,8 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private LimbusDetectionHough limbusDetectionHough;
-    private ColorMarkersDetectionHuMoments colorMarkersDetectionHuMoments;
+//    private ColorMarkersDetectionHuMoments colorMarkersDetectionHuMoments;
+    private ColorMarkersDetectionEntropy colorMarkersDetectionEntropy;
     private Mat mRgba;
     private Mat mHsv;
     private Mat mGray;
@@ -109,7 +110,8 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 
         limbusDetectionHough = new LimbusDetectionHough(width, height);
 //        bionikoDetectionCorrelation = new BionikoDetectionCorrelation(this, width, height);
-        colorMarkersDetectionHuMoments = new ColorMarkersDetectionHuMoments(width, height);
+//        colorMarkersDetectionHuMoments = new ColorMarkersDetectionHuMoments(width, height);
+        colorMarkersDetectionEntropy = new ColorMarkersDetectionEntropy(width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mHsv = new Mat(height, width, CvType.CV_8UC3);
         mGray = new Mat(height, width, CvType.CV_8UC1);
@@ -139,7 +141,8 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 
         double[] limbusCircle = limbusDetectionHough.process(mValue);
         if (limbusCircle != null) {
-            double zerothAngle = colorMarkersDetectionHuMoments.process(mHsv, limbusCircle);
+//            double zerothAngle = colorMarkersDetectionHuMoments.process(mHsv, limbusCircle);
+            double zerothAngle = colorMarkersDetectionEntropy.process(mHsv, limbusCircle);
 //            Log.i(TAG, "zerothAngle (red strip): " + zerothAngle);
 
             Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
@@ -178,6 +181,8 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 //            Mat bionikoVis = bionikoDetectionCorrelation.visualize();
 //            Overlays.drawVisualization(mRgba, bionikoVis, 0.5);
 //            Mat colorMarkersVis = colorMarkersDetectionHuMoments.visualize();
+//            Overlays.drawVisualization(mRgba, colorMarkersVis, 0.8);
+//            Mat colorMarkersVis = colorMarkersDetectionEntropy.visualize();
 //            Overlays.drawVisualization(mRgba, colorMarkersVis, 0.8);
         }
 

@@ -42,7 +42,8 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private LimbusDetectionHough limbusDetectionHough;
-    private ColorMarkersDetectionHuMoments colorMarkersDetectionHuMoments;
+//    private ColorMarkersDetectionHuMoments colorMarkersDetectionHuMoments;
+    private ColorMarkersDetectionEntropy colorMarkersDetectionEntropy;
     private Mat mRgba;
     private Mat mGray;
     private Mat mValue;
@@ -129,7 +130,8 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
 //        Log.i(TAG, "Scaled height/width: " + mScaledHeight + "/" + mScaledWidth);
 
         limbusDetectionHough = new LimbusDetectionHough(width, height);
-        colorMarkersDetectionHuMoments = new ColorMarkersDetectionHuMoments(width, height);
+//        colorMarkersDetectionHuMoments = new ColorMarkersDetectionHuMoments(width, height);
+        colorMarkersDetectionEntropy = new ColorMarkersDetectionEntropy(width, height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
         mValue = new Mat(height, width, CvType.CV_8UC1);
@@ -154,7 +156,8 @@ public class IncisionsStageActivity extends Activity implements CameraBridgeView
 
         double[] limbusCircle = limbusDetectionHough.process(mValue);
         if (limbusCircle != null) {
-            double zerothAngle = colorMarkersDetectionHuMoments.process(mHsv, limbusCircle);
+//            double zerothAngle = colorMarkersDetectionHuMoments.process(mHsv, limbusCircle);
+            double zerothAngle = colorMarkersDetectionEntropy.process(mHsv, limbusCircle);
 //            Log.i(TAG, "zerothAngle (red strip): " + zerothAngle);
 
             Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
