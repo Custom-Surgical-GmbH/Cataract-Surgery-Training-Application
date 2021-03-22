@@ -23,9 +23,12 @@ import org.opencv.imgproc.Imgproc;
 public class EmulsificationStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
     private static final String TAG = "Emulsification";
     public static final double SAFE_ZONE_DIAMETER_DEFAULT = 5.0;
+    public static final int TRACKING_PARAMETERS_COUNT = 3;
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private LimbusDetectionHough limbusDetectionHough;
+    private AveragingFilter averagingFilter;
+    private Mat trackingParameters;
     private Mat mRgba;
     private Mat mGray;
     private Mat mHsv;
@@ -104,6 +107,8 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
 //        Log.i(TAG, "Scaled height/width: " + mScaledHeight + "/" + mScaledWidth);
 
         limbusDetectionHough = new LimbusDetectionHough(width, height);
+        averagingFilter = new AveragingFilter(TRACKING_PARAMETERS_COUNT);
+        trackingParameters = new Mat(1, TRACKING_PARAMETERS_COUNT, CvType.CV_32F);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
         mValue = new Mat(height, width, CvType.CV_8UC1);
@@ -112,6 +117,7 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
 
     @Override
     public void onCameraViewStopped() {
+        trackingParameters.release();
         mRgba.release();
         mGray.release();
         mHsv.release();
@@ -133,8 +139,15 @@ public class EmulsificationStageActivity extends Activity implements CameraBridg
 
         double[] limbusCircle = limbusDetectionHough.process(mValue);
         if (limbusCircle != null) {
-                        Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
-            double limbusRadius = limbusCircle[2];
+            trackingParameters.put(0, 0, limbusCircle[0]);
+            trackingParameters.put(0, 1, limbusCircle[1]);
+            trackingParameters.put(0, 2, limbusCircle[2]);
+
+            averagingFilter.process(trackingParameters, trackingParameters);
+
+            Point limbusCenter =  new Point(trackingParameters.get(0, 0)[0],
+                    trackingParameters.get(0, 1)[0]);
+            double limbusRadius = trackingParameters.get(0, 2)[0];
 
             // stage-specific overlays
             Overlays.drawCircle(mRgba,

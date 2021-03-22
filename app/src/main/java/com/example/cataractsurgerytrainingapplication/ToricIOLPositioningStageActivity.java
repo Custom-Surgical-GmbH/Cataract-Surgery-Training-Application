@@ -26,11 +26,14 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
     private static final String TAG = "ToricIOLPositioning";
     public static final double LENS_AXIS_ANGLE_DEFAULT = 90.0;
     public static final double LENS_AXIS_SHIFT_P = 0.05;
+    public static final int TRACKING_PARAMETERS_COUNT = 4;
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private LimbusDetectionHough limbusDetectionHough;
 //    private ColorMarkersDetectionHuMoments colorMarkersDetectionHuMoments;
     private ColorMarkersDetectionEntropy colorMarkersDetectionEntropy;
+    private AveragingFilter averagingFilter;
+    private Mat trackingParameters;
     private Mat mRgba;
     private Mat mHsv;
     private Mat mGray;
@@ -112,6 +115,8 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 //        bionikoDetectionCorrelation = new BionikoDetectionCorrelation(this, width, height);
 //        colorMarkersDetectionHuMoments = new ColorMarkersDetectionHuMoments(width, height);
         colorMarkersDetectionEntropy = new ColorMarkersDetectionEntropy(width, height);
+        averagingFilter = new AveragingFilter(TRACKING_PARAMETERS_COUNT);
+        trackingParameters = new Mat(1, TRACKING_PARAMETERS_COUNT, CvType.CV_32F);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mHsv = new Mat(height, width, CvType.CV_8UC3);
         mGray = new Mat(height, width, CvType.CV_8UC1);
@@ -120,6 +125,7 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
 
     @Override
     public void onCameraViewStopped() {
+        trackingParameters.release();
         mRgba.release();
         mHsv.release();
         mGray.release();
@@ -145,8 +151,20 @@ public class ToricIOLPositioningStageActivity extends Activity implements Camera
             double zerothAngle = colorMarkersDetectionEntropy.process(mHsv, limbusCircle);
 //            Log.i(TAG, "zerothAngle (red strip): " + zerothAngle);
 
-            Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
-            double limbusRadius = limbusCircle[2];
+            trackingParameters.put(0, 0, limbusCircle[0]);
+            trackingParameters.put(0, 1, limbusCircle[1]);
+            trackingParameters.put(0, 2, limbusCircle[2]);
+            trackingParameters.put(0, 3, zerothAngle);
+
+            averagingFilter.process(trackingParameters, trackingParameters);
+
+            Point limbusCenter =  new Point(trackingParameters.get(0, 0)[0],
+                    trackingParameters.get(0, 1)[0]);
+            double limbusRadius = trackingParameters.get(0, 2)[0];
+            zerothAngle = trackingParameters.get(0, 3)[0];
+
+//            Point limbusCenter =  new Point(limbusCircle[0], limbusCircle[1]);
+//            double limbusRadius = limbusCircle[2];
 
             // stage-specific overlays
             Overlays.drawAxis(mRgba,

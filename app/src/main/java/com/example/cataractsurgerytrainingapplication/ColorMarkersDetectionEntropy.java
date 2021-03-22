@@ -1,5 +1,7 @@
 package com.example.cataractsurgerytrainingapplication;
 
+import android.util.Log;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -7,6 +9,9 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColorMarkersDetectionEntropy {
     public static final String TAG = "ColorMarkerDetection";
@@ -28,9 +33,11 @@ public class ColorMarkersDetectionEntropy {
     public static final int POLAR_RADIUS_RESOLUTION = 115;
     public static final int POLAR_ENTROPY_NEIGHBORS = 20;
 
+    public static final double ENTROPY_EPS = Math.log(0.8);
+
     private Mat polarEntropyFilter;
     private Mat polarEntropyMask;
-    private Core.MinMaxLocResult result;
+    private Core.MinMaxLocResult minMaxLocResult;
 
     private Mat hsv;
     private Mat hsvPolarRotated;
@@ -159,9 +166,20 @@ public class ColorMarkersDetectionEntropy {
                 stackedPolarAugReducedFloat2,
                 stackedPolarAugReducedFloat1);
 
-        result = Core.minMaxLoc(stackedPolarAugReducedFloat1, polarEntropyMask);
+        minMaxLocResult = Core.minMaxLoc(stackedPolarAugReducedFloat1, polarEntropyMask);
+        double minOptimalVal = minMaxLocResult.maxVal + ENTROPY_EPS;
+        List<Integer> optimalDegs = new ArrayList<>();
+        for (int i = POLAR_ENTROPY_NEIGHBORS/2;
+                i < (stackedPolarAugReducedFloat1.width() - POLAR_ENTROPY_NEIGHBORS/2); i++) {
+            if (stackedPolarAugReducedFloat1.get(0, i)[0] > minOptimalVal) {
+                optimalDegs.add(i);
+            }
+        }
 
-        return (double) (result.maxLoc.x - POLAR_ENTROPY_NEIGHBORS / 2) / 2;
+        double optimalDeg = optimalDegs.get(optimalDegs.size()/2);
+        Log.i(TAG, optimalDegs.toString() + " -> " + optimalDeg);
+
+        return (double) (optimalDeg - POLAR_ENTROPY_NEIGHBORS / 2) / 2;
     }
 
     private void segmentColor(Mat srcHsv, Mat dest, String color) {
