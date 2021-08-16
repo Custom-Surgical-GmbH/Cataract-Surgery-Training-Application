@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-include /home/miroslav/Android/OpenCV/opencv-4.5.1-android-sdk/OpenCV-android-sdk/sdk/native/jni/OpenCV.mk
+include /Users/mirek/Documents/Custom_Surgical/Cataract-Surgery-Training-Application/openCVLibrary453/native/jni/OpenCV.mk
 
 LOCAL_MODULE    := native-lib
 LOCAL_SRC_FILES := jni_part.cpp

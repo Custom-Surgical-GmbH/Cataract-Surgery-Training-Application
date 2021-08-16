@@ -1,5 +1,3 @@
-include ':openCVLibrary451'
-include ':openCVLibrary451'
 include ':app'
 rootProject.name = "Cataract Surgery Training Application"
-include ':openCVLibrary451'
+include ':openCVLibrary453'

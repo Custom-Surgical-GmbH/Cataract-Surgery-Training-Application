@@ -83,4 +83,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nativeVideoProcessingDemoBtn" />
 
+    <Button
+        android:id="@+id/capsulotomyProjectorPrototypeMenuBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:onClick="startCapsulotomyProjectorPrototypeActivity"
+        android:text="capsulotomy projector prototype"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cataractSurgeryTrainingBtn" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

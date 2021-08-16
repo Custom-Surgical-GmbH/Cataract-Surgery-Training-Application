@@ -52,16 +52,23 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void startCapsulotomyProjectorPrototypeMenuActivity(View view) {
+        Intent intent = new Intent(this, CapsulotomyProjectorPrototypeMenuActivity.class);
+        startActivity(intent);
+    }
+
     private void enableVideoFunctionalityAccess() {
         Button videoProcessingDemoBtn = (Button) findViewById(R.id.videoProcessingDemoBtn);
         Button memoryLeakTestBtn = (Button) findViewById(R.id.memoryLeakTestBtn);
         Button nativeVideoProcessingDemoBtn = (Button) findViewById(R.id.nativeVideoProcessingDemoBtn);
         Button cataractSurgeryTrainingBtn = (Button) findViewById(R.id.cataractSurgeryTrainingBtn);
+        Button capsulotomyProjectorPrototypeMenuBtn = (Button) findViewById(R.id.capsulotomyProjectorPrototypeMenuBtn);
 
         videoProcessingDemoBtn.setEnabled(true);
         memoryLeakTestBtn.setEnabled(true);
         nativeVideoProcessingDemoBtn.setEnabled(true);
         cataractSurgeryTrainingBtn.setEnabled(true);
+        capsulotomyProjectorPrototypeMenuBtn.setEnabled(true);
     }
 
     private void desibleVideoFunctionalityAccess() {
@@ -69,11 +76,13 @@ public class MainActivity extends AppCompatActivity {
         Button memoryLeakTestBtn = (Button) findViewById(R.id.memoryLeakTestBtn);
         Button nativeVideoProcessingDemoBtn = (Button) findViewById(R.id.nativeVideoProcessingDemoBtn);
         Button cataractSurgeryTrainingBtn = (Button) findViewById(R.id.cataractSurgeryTrainingBtn);
+        Button capsulotomyProjectorPrototypeMenuBtn = (Button) findViewById(R.id.capsulotomyProjectorPrototypeMenuBtn);
 
         videoProcessingDemoBtn.setEnabled(false);
         memoryLeakTestBtn.setEnabled(false);
         nativeVideoProcessingDemoBtn.setEnabled(false);
         cataractSurgeryTrainingBtn.setEnabled(false);
+        capsulotomyProjectorPrototypeMenuBtn.setEnabled(false);
     }
 
     @Override
