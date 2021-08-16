@@ -21,7 +21,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class CapsulotomyProjectorPrototypeStageActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
-    private static final String TAG = "CapsulotomyProjectorPrototype";
+    private static final String TAG = "CapsulotomyProjProto";
     public static final double CAPSULOTOMY_DIAMETER_DEFAULT = 5.0;
     public static final double PROJECTOR_VIEW_DIAMETER_DEFAULT = 25.0;
     public static final int TRACKING_PARAMETERS_COUNT = 3;
