@@ -28,6 +28,7 @@
         <activity android:name=".EmulsificationMenuActivity" />
         <activity android:name=".CapsulotomyMenuActivity" />
         <activity android:name=".IncisionsMenuActivity" />
+        <activity android:name=".CapsulotomyProjectorPrototypeMenuActivity" />
         <activity android:name=".CataractSurgeryTrainingActivity" />
         <activity
             android:name=".VideoProcessingDemoActivity"
@@ -55,6 +56,10 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
         <activity
             android:name=".NativeVideoProcessingDemoActivity"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".CapsulotomyProjectorPrototypeStageActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
         <activity android:name=".LimbusDetectionDemoActivity" />

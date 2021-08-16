@@ -14,7 +14,7 @@ public class CapsulotomyProjectorPrototypeMenuActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_capsulotomy_menu);
+        setContentView(R.layout.activity_capsulotomy_projector_prototype_menu);
 
         capsulotomyDiameterEditText = findViewById(R.id.capsulotomyDiameterEditText);
         projectorViewDiameterEditText = findViewById(R.id.projectorViewDiameterEditText);

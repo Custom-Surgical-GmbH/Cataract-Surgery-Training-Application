@@ -153,6 +153,9 @@ public class CapsulotomyProjectorPrototypeStageActivity extends Activity impleme
                     trackingParameters.get(0, 1)[0]);
             double limbusRadius = trackingParameters.get(0, 2)[0];
 
+            // projector-specific changes
+            mRgba.setTo(new Scalar(0,0,0,255));
+
             // stage-specific overlays
             Overlays.drawCircle(mRgba,
                     limbusCenter,
